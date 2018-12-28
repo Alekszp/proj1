@@ -1,27 +1,53 @@
 import React from 'react';
 import NoteEditor from './NoteEditor.jsx';
 import NotesGrid from './NotesGrid.jsx';
+import NoteStore from '../stores/NoteStore';
+import NoteActions from '../actions/NotesActions';
+
+import './App.less';
+
+function getStateFromFlux() {
+    return {
+        isLoading: NoteStore.isLoading(),
+        notes: NoteStore.getNotes()
+    }
+}
 
 export default class App extends React.Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
-        this.onNoteAdd = this.onNoteAdd.bind(this);
+        this.state = getStateFromFlux();
+        this.handleNoteAdd = this.handleNoteAdd.bind(this);
+
+
     }
 
-    onNoteAdd(data){
-        console.log(data);
+    handleNoteAdd(data) {
+        NoteActions.createNote(data);
+    }
+    componentDidMount() {
+        NoteStore.addChangeListener(this._onChange);
+    }
+    componentWillMount(){
+        NoteActions.loadNotes();
+    }
+    componentWillUnmount() {
+        NoteStore.removeChangeListener(this._onChange);
     }
 
     render() {
         return (
             <div className='App'>
                 <h2 className='App__header'>Hello, HELLO!!!!</h2>
-                <NoteEditor onNoteAdd={this.handleNoteAdd}/>
+                <NoteEditor onNoteAdd={this.handleNoteAdd} />
                 <NotesGrid />
             </div>
         );
 
+    }
+    _onChange() {
+        this.setState(getStateFromFlux());
     }
 };
 
